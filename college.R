@@ -211,26 +211,24 @@ train.mat <- model.matrix(Apps~.-Enroll -Accept, data=College[train,])
 valid.mat <- model.matrix(Apps~.-Enroll -Accept, data=College[valid,])
 test.mat <- model.matrix(Apps~.-Enroll -Accept, data=College[test,])
 
-# Regresja brzegowa 
-# wyznaczenie zbioru parametrow lambda, sposrod ktorych
-# zostanie wybrany najlepszy
+# Ridge regression 
+# looking for an optimal lambda parameter
 grid <- 10 ^ seq(4, -2, length=100)
 
-# wybor najlepszego parametru lambda za pomoc? walidacji krzy?owej
 mod.ridge <- cv.glmnet(train.mat, College$Apps[train], alpha=0,
                        lambda=grid, thresh=1e-12)
 lambda.best.1 <- mod.ridge$lambda.min
 
-# najlepsza wartosc parametru lambda dla regresji brzegowej
+# optimal lambda parameter
 lambda.best.1
 
-# zbudowanie modelu z nowym parametrem lambda
+# building a model with the new lambda parameter
 ridge.pred <- predict(mod.ridge, newx=valid.mat, s=lambda.best.1)
 
-# blad sredniokwadratowy regresji brzegowej na zbiorze walidacyjnym:
+# MSE of the ridge regression on the validation set:
 lm.err.3 <- mean((College$Apps[valid] - ridge.pred)^2)
 
-# wspolczynniki modelu regresji brzegowej wyznaczone na calym zbiorze danych:
+# coefficients of the ridge regression computed on the whole data set:
 mod.ridge <- glmnet(model.matrix(Apps~.-Enroll -Accept, data=College), College[, "Apps"], alpha=0)
 ridge.coef <- predict(mod.ridge, s=lambda.best.1, type="coefficients")
 ridge.coef
